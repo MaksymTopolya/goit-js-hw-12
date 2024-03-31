@@ -8,16 +8,16 @@
     <link rel="stylesheet" href="./css/styles.css" />
   </head>
   <body>
-    <load ="partials/header.html" />
-
-    <section>
-      <h1>Example page title</h1>
-      <!-- Path to images as from index.html file -->
-      <img src="./img/javascript.svg" alt="" />
-    </section>
-
-    <!-- Loads the specified .html file -->
-    <load ="partials/vite-promo.html" />
+  <div class="form-div">
+    <form class="form">
+      <input class="inp" type="text" placeholder="Search images..." name="search">
+      <button type="submit" class="btn">Search</button>
+    </form>
+    <h4 class="loading hide">Loading images.Please wait...</h4>
+    <ul class="list"></ul>
+    <button type="button" class="more-btn ">Load more</button>
+    <h4 class="loading-afterBtn hide">Loading images.Please wait...</h4>
+  </div>
 
     <script type="module" src="./main.js"></script>
   </body>
