@@ -5,26 +5,23 @@ import "izitoast/dist/css/iziToast.min.css";
 const list = document.querySelector(".list")
 const form = document.querySelector(".form")
 const moreBtn = document.querySelector(".more-btn")
-const loading = document.querySelector(".loading")
-const loadInBtn = document.querySelector(".loading-afterBtn")
+const loadingAfterButton = document.querySelector(".loading-afterBtn")
 form.addEventListener("submit", handleSubmit)
 moreBtn.addEventListener("click", loadMore)
 
 let currentPage = 1;
 let maxPage = 0;
 const pageSize = 15;
-let inputValue
+let searchQuery 
 hideLoadMore()
-const galleryCardHeight = document.querySelector('.list-item').getBoundingClientRect().height;
-
-loadingHideMoreBtn()
+loadingAfterButtonHide()
 
 async function handleSubmit(event) {
     event.preventDefault()
 
- inputValue = event.target.elements.search.value
+ searchQuery = event.target.elements.search.value
     currentPage = 1
-       if (!inputValue) {
+       if (!searchQuery) {
     return iziToast.error({
            title: 'Hey',
            message: "Write something to search",
@@ -34,34 +31,39 @@ async function handleSubmit(event) {
           color: 'black',
 });
     }
-    loadingShow()
     
     try {
-        const data = await getPhotos(inputValue, currentPage)
+        const data = await getPhotos(searchQuery, currentPage)
         maxPage = Math.ceil(data.totalHits / pageSize);
-
-        if (maxPage === 0) {
+        if (data.hits.length === 0) {
           return iziToast.error({
            title: 'Hey',
-           message: "You have reached the end",
+           message: "We can not find something",
            theme: 'dark',
           backgroundColor: 'red',
           position: 'topCenter',
           color: 'black',
 });
         }
+        list.innerHTML = ''
 
-         loadingHide()
         list.innerHTML = markupMyImg(data.hits) 
         showLoadMore()
-
+        const galleryCardHeight = document.querySelector('.list-item').getBoundingClientRect().height;
         window.scrollBy({
             top: galleryCardHeight * 2,
             behavior: 'smooth'
         });
 
     } catch (error) {
-        console.log(error)
+        return iziToast.error({
+           title: 'Hey',
+           message: [error],
+           theme: 'dark',
+          backgroundColor: 'red',
+          position: 'topCenter',
+          color: 'black',
+});
     }
 
 }
@@ -69,19 +71,36 @@ async function handleSubmit(event) {
 async function loadMore(event) {
     try {
         hideLoadMore()
-        loadingShowMoreBtn()
-        const load = await getPhotos(inputValue, currentPage += 1)
+        loadingAfterButtonShow()
+        let load; 
+        if (maxPage > currentPage) {
+            load = await getPhotos(searchQuery, currentPage += 1)
+        }
         if (maxPage <= currentPage) {
-         hideLoadMore()
+            hideLoadMore()
         }
 
-        loadingHideMoreBtn()
-        list.insertAdjacentHTML("beforeend", markupMyImg(load.hits)) 
+        loadingAfterButtonHide()
+        list.insertAdjacentHTML("beforeend", markupMyImg(load.hits))
+        const galleryCardHeight = document.querySelector('.list-item').getBoundingClientRect().height;
+        window.scrollBy({
+            top: galleryCardHeight * 2,
+            behavior: 'smooth'
+        });
         showLoadMore()
     } catch (err) {
-        console.log(err)
+        console.error(err); 
+        return iziToast.error({
+           title: 'Hey',
+           message: [err],
+           theme: 'dark',
+          backgroundColor: 'red',
+          position: 'topCenter',
+          color: 'black',
+        });
     }
 }
+
 
 
 function showLoadMore() {
@@ -94,21 +113,10 @@ function hideLoadMore() {
 
 
 
-
-function loadingHide() {
-    loading.classList.add("hide")
+function loadingAfterButtonHide() {
+    loadingAfterButton.classList.add("hiden")
 }
 
-function loadingShow() {
-    loading.classList.remove("hide")
-}
-
-
-
-function loadingHideMoreBtn() {
-    loadInBtn.classList.add("hide")
-}
-
-function loadingShowMoreBtn() {
-    loadInBtn.classList.remove("hide")
+function loadingAfterButtonShow() {
+    loadingAfterButton.classList.remove("hiden")
 }
