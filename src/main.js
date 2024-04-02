@@ -18,6 +18,7 @@ loadingAfterButtonHide()
 
 async function handleSubmit(event) {
     event.preventDefault()
+    list.innerHTML = ''
 
  searchQuery = event.target.elements.search.value
     currentPage = 1
@@ -45,15 +46,15 @@ async function handleSubmit(event) {
           color: 'black',
 });
         }
-        list.innerHTML = ''
+          if (data.hits.length < 15) {
+            hideLoadMore()
+        }
 
         list.innerHTML = markupMyImg(data.hits) 
-        showLoadMore()
-        const galleryCardHeight = document.querySelector('.list-item').getBoundingClientRect().height;
-        window.scrollBy({
-            top: galleryCardHeight * 2,
-            behavior: 'smooth'
-        });
+
+        if (maxPage > currentPage) {
+            showLoadMore();
+        }
 
     } catch (error) {
         return iziToast.error({
@@ -64,6 +65,8 @@ async function handleSubmit(event) {
           position: 'topCenter',
           color: 'black',
 });
+    } finally {
+        scrollToLoadedImages();
     }
 
 }
@@ -73,20 +76,17 @@ async function loadMore(event) {
         hideLoadMore()
         loadingAfterButtonShow()
         let load; 
+
         if (maxPage > currentPage) {
             load = await getPhotos(searchQuery, currentPage += 1)
         }
         if (maxPage <= currentPage) {
             hideLoadMore()
+            return
         }
 
         loadingAfterButtonHide()
         list.insertAdjacentHTML("beforeend", markupMyImg(load.hits))
-        const galleryCardHeight = document.querySelector('.list-item').getBoundingClientRect().height;
-        window.scrollBy({
-            top: galleryCardHeight * 2,
-            behavior: 'smooth'
-        });
         showLoadMore()
     } catch (err) {
         console.error(err); 
@@ -98,9 +98,18 @@ async function loadMore(event) {
           position: 'topCenter',
           color: 'black',
         });
+    } finally {
+        scrollToLoadedImages();
     }
 }
 
+function scrollToLoadedImages() {
+    const galleryCardHeight = document.querySelector('.list-item').getBoundingClientRect().height;
+    window.scrollBy({
+        top: galleryCardHeight * 2,
+        behavior: 'smooth'
+    });
+}
 
 
 function showLoadMore() {
